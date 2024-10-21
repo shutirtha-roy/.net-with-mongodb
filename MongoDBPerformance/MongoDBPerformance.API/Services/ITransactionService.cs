@@ -3,7 +3,7 @@ using MongoDBPerformance.API.BusinessObject;
 
 namespace MongoDBPerformance.API.Services
 {
-    public interface IDataGeneratorService
+    public interface ITransactionService
     {
         Task<IList<Transaction>> GetAllData();
         List<BsonDocument> InsertData();

@@ -5,16 +5,16 @@ namespace MongoDBPerformance.API.DTOs
 {
     public class MongoDbDataListDTO
     {
-        private readonly IDataGeneratorService _dataGeneratorService;
+        private readonly ITransactionService _transactionService;
 
-        public MongoDbDataListDTO()
+        public MongoDbDataListDTO(ITransactionService transactionService)
         {
-            _dataGeneratorService = new DataGeneratorService();
+            _transactionService = transactionService;
         }
 
         internal async Task<object> GetAllData()
         {
-            var dataList = await _dataGeneratorService.GetAllData();
+            var dataList = await _transactionService.GetAllData();
 
             var response = new APIResponse();
             response.Result = dataList;

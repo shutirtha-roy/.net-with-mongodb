@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace MongoDBPerformance.API.Services
 {
-    public class DataGeneratorService : IDataGeneratorService
+    public class TransactionService : ITransactionService
     {
         public async Task<IList<Transaction>> GetAllData()
         {
