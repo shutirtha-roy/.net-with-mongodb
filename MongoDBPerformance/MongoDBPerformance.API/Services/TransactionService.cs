@@ -1,13 +1,26 @@
 ﻿using Bogus;
+using Bogus.DataSets;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDBPerformance.API.BusinessObject;
+using MongoDBPerformance.API.DTOs;
+using System.Net;
 using System.Text.Json;
 
 namespace MongoDBPerformance.API.Services
-{
+{    
+
     public class TransactionService : ITransactionService
     {
+        private readonly IMongoCollection<Transaction> _collection;
+
+        public TransactionService()
+        {
+            var client = new MongoClient("mongodb://localhost:27017");
+            var database = client.GetDatabase("ecommerce");
+            _collection = database.GetCollection<Transaction>("transactions");
+        }
+
         public async Task<IList<Transaction>> GetAllData()
         {
             var client = new MongoClient("mongodb://localhost:27017");
@@ -129,6 +142,45 @@ namespace MongoDBPerformance.API.Services
             }
 
             return items;
+        }
+
+        public async Task<IList<MonthlySalesReportDTO>> GetMonthlySalesReportAsync()
+        {
+            var pipeline = new BsonDocument[]
+            {
+                new BsonDocument("$group", new BsonDocument
+                {
+                    { "_id", new BsonDocument
+                        {
+                            { "year", new BsonDocument("$year", "$Timestamp") },
+                            { "month", new BsonDocument("$month", "$Timestamp") }
+                        }
+                    },
+                    { "totalSales", new BsonDocument("$sum", "$TotalAmount") },
+                    { "averageOrderValue", new BsonDocument("$avg", "$TotalAmount") },
+                    { "orderCount", new BsonDocument("$sum", 1) }
+                }),
+                new BsonDocument("$sort", new BsonDocument("_id", 1))
+            };
+
+            var result = await _collection.Aggregate<BsonDocument>(pipeline).ToListAsync();
+
+            var monthlySalesReports = new List<MonthlySalesReportDTO>();
+
+            foreach (var doc in result)
+            {
+                var idDoc = doc["_id"].AsBsonDocument;
+                monthlySalesReports.Add(new MonthlySalesReportDTO
+                {
+                    Year = idDoc["year"].AsInt32,
+                    Month = idDoc["month"].AsInt32,
+                    TotalSales = doc["totalSales"].AsDecimal,
+                    AverageOrderValue = doc["averageOrderValue"].AsDecimal,
+                    OrderCount = doc["orderCount"].AsInt32
+                });
+            }
+
+            return monthlySalesReports;
         }
     }
 }

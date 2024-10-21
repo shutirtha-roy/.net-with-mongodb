@@ -21,7 +21,7 @@ namespace MongoDBPerformance.API.Controllers
             _featureListDTO = mongoDbFeatureListDto;
         }
 
-        [HttpGet(Name = "get")]
+        [HttpGet(Name = "get-data-list")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<object>> GetAllData()
         {
@@ -31,15 +31,15 @@ namespace MongoDBPerformance.API.Controllers
             return Ok(dataList);
         }
 
-        //[HttpGet("monthly-report")]
-        //[ProducesResponseType(StatusCodes.Status200OK)]
-        //[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        //public async Task<ActionResult<APIResponse>> GetMonthlySalesReport()
-        //{
-        //    var dtoMongoDb = _featureListDTO;
-        //    var report = await dtoMongoDb.GetMonthlyReport();
+        [HttpGet("monthly-report")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<APIResponse>> GetMonthlySalesReport()
+        {
+            var featureListDto = _featureListDTO;
+            var response = await featureListDto.GetMonthlyReport();
 
-        //    return StatusCode((int)response.StatusCode, response);
-        //}
+            return Ok(response);
+        }
     }
 }

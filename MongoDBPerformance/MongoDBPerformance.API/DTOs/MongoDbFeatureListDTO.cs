@@ -10,5 +10,15 @@ namespace MongoDBPerformance.API.DTOs
         {
             _transactionService = transactionService;
         }
+
+        internal async Task<object> GetMonthlyReport()
+        {
+            var monthlyRepost = await _transactionService.GetMonthlySalesReportAsync();
+
+            var response = new APIResponse();
+            response.Result = monthlyRepost;
+
+            return monthlyRepost;
+        }
     }
 }
