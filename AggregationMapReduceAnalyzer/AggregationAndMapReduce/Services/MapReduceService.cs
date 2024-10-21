@@ -16,52 +16,86 @@ namespace AggregationAndMapReduce.Services
 
         public async Task<List<BsonDocument>> AnalyzeSales(DateTime startDate, DateTime endDate)
         {
-                var map = new BsonJavaScript(@"
-                    function() {
-                        var year = this.date.getFullYear();
-                        var month = this.date.getMonth() + 1;
-                        var sales = this.price * this.quantity;
-                        emit({ year: year, month: month, category: this.category }, { totalSales: sales, count: 1 });
-                    }");
+            var filter = Builders<BsonDocument>.Filter.And(
+                Builders<BsonDocument>.Filter.Gte("date", startDate),
+                Builders<BsonDocument>.Filter.Lt("date", endDate)
+            );
 
-                var reduce = new BsonJavaScript(@"
-                    function(key, values) {
-                        var result = { totalSales: 0, count: 0 };
-                        values.forEach(function(value) {
-                            result.totalSales += value.totalSales;
-                            result.count += value.count;
-                        });
-                        return result;
-                    }");
+            var documents = await _collection.Find(filter).ToListAsync();
 
-                var finalize = new BsonJavaScript(@"
-                    function(key, reducedValue) {
-                        reducedValue.averageSale = reducedValue.totalSales / reducedValue.count;
-                        return reducedValue;
-                    }");
+            var results = documents
+                .Select(Map)
+                .Where(x => x.HasValue)
+                .GroupBy(x => x.Value.Key)
+                .Select(g => Reduce(g.Key, g.Select(x => x.Value.Value)))
+                .Select(Finalize)
+                .OrderBy(x => x["_id"]["year"])
+                .ThenBy(x => x["_id"]["month"])
+                .ThenBy(x => x["_id"]["category"])
+                .ToList();
 
-                var options = new MapReduceOptions<BsonDocument, BsonDocument>
+            return results;
+        }
+
+        private static KeyValuePair<BsonDocument, BsonDocument>? Map(BsonDocument document)
+        {
+            if (document.TryGetValue("date", out BsonValue dateValue) &&
+                document.TryGetValue("price", out BsonValue priceValue) &&
+                document.TryGetValue("quantity", out BsonValue quantityValue) &&
+                document.TryGetValue("category", out BsonValue categoryValue))
+            {
+                if (dateValue.IsValidDateTime && priceValue.IsNumeric && quantityValue.IsNumeric)
                 {
-                    OutputOptions = MapReduceOutputOptions.Inline,
-                    Filter = Builders<BsonDocument>.Filter.And(
-                        Builders<BsonDocument>.Filter.Gte("date", startDate),
-                        Builders<BsonDocument>.Filter.Lt("date", endDate)
-                    ),
-                    Finalize = finalize,
-                    Sort = Builders<BsonDocument>.Sort.Ascending("date")
-                };
+                    var date = dateValue.ToUniversalTime();
+                    var year = date.Year;
+                    var month = date.Month;
+                    var sales = priceValue.ToDouble() * quantityValue.ToInt32();
 
+                    var key = new BsonDocument
+                    {
+                        { "year", year },
+                        { "month", month },
+                        { "category", categoryValue.AsString }
+                    };
 
-                var results = await _collection.MapReduceAsync(map, reduce, options);
+                    var value = new BsonDocument
+                    {
+                        { "totalSales", sales },
+                        { "count", 1 }
+                    };
 
-                if (results == null)
-                {
-                    return new List<BsonDocument>();
+                    return new KeyValuePair<BsonDocument, BsonDocument>(key, value);
                 }
+            }
+            return null;
+        }
 
-                var resultList = await results.ToListAsync();
+        private static BsonDocument Reduce(BsonDocument key, IEnumerable<BsonDocument> values)
+        {
+            double totalSales = values.Sum(v => v["totalSales"].AsDouble);
+            int count = values.Sum(v => v["count"].AsInt32);
 
-                return resultList;
+            return new BsonDocument
+            {
+                { "_id", key },
+                { "value", new BsonDocument
+                    {
+                        { "totalSales", totalSales },
+                        { "count", count }
+                    }
+                }
+            };
+        }
+
+        private static BsonDocument Finalize(BsonDocument result)
+        {
+            var value = result["value"].AsBsonDocument;
+            double totalSales = value["totalSales"].AsDouble;
+            int count = value["count"].AsInt32;
+
+            value.Add("averageSale", count > 0 ? totalSales / count : 0);
+
+            return result;
         }
     }
 }
