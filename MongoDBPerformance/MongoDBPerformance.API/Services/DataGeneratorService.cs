@@ -24,8 +24,8 @@ namespace MongoDBPerformance.API.Services
             {
                 var transaction = new Transaction
                 {
-                    TransactionId = doc.GetValue("TransactionId").AsObjectId,
-                    UserId = doc.GetValue("UserId").AsObjectId,
+                    TransactionId = doc.GetValue("TransactionId").AsObjectId.ToString(),
+                    UserId = doc.GetValue("UserId").AsObjectId.ToString(),
                     Timestamp = doc.GetValue("Timestamp").ToUniversalTime(),
                     TotalAmount = doc.GetValue("TotalAmount").ToDecimal(),
                     PaymentMethod = doc.GetValue("PaymentMethod").AsString,
@@ -45,7 +45,7 @@ namespace MongoDBPerformance.API.Services
                 {
                     var item = new Item
                     {
-                        ItemId = itemDoc["ProductId"].AsObjectId,
+                        ItemId = itemDoc["ProductId"].AsObjectId.ToString(),
                         Description = itemDoc["ProductName"].AsString,
                         Quantity = itemDoc["Quantity"].AsInt32,
                         Price = itemDoc["Price"].ToDecimal()

@@ -7,10 +7,10 @@ namespace MongoDBPerformance.API.BusinessObject
     public class Transaction
     {
         [JsonPropertyName("transactionId")]
-        public ObjectId TransactionId { get; set; }
+        public string TransactionId { get; set; }
 
         [JsonPropertyName("userId")]
-        public ObjectId UserId { get; set; }
+        public string UserId { get; set; }
 
         [JsonPropertyName("timestamp")]
         public DateTime Timestamp { get; set; }
@@ -55,7 +55,7 @@ namespace MongoDBPerformance.API.BusinessObject
     {
         [BsonElement("ProductId")]
         [JsonPropertyName("itemId")]
-        public ObjectId ItemId { get; set; }
+        public string ItemId { get; set; }
 
         [BsonElement("ProductName")]
         [JsonPropertyName("description")]
