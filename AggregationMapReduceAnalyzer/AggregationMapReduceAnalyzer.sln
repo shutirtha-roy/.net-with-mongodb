@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35312.102
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AggregationAndMapReduce", "AggregationAndMapReduce\AggregationAndMapReduce.csproj", "{EF7E094C-C805-4A74-A346-D7066B511D01}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EF7E094C-C805-4A74-A346-D7066B511D01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF7E094C-C805-4A74-A346-D7066B511D01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF7E094C-C805-4A74-A346-D7066B511D01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF7E094C-C805-4A74-A346-D7066B511D01}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {548FF249-E907-4637-809A-B2D27EE2C0E7}
+	EndGlobalSection
+EndGlobal
