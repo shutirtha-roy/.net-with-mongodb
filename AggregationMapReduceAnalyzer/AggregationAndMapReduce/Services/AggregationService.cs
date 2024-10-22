@@ -21,43 +21,43 @@ namespace AggregationAndMapReduce.Services
         {
             var pipeline = new[]
             {
-            new BsonDocument("$match", new BsonDocument
-            {
-                { "date", new BsonDocument
-                    {
-                        { "$gte", startDate },
-                        { "$lt", endDate }
+                new BsonDocument("$match", new BsonDocument
+                {
+                    { "date", new BsonDocument
+                        {
+                            { "$gte", startDate },
+                            { "$lt", endDate }
+                        }
                     }
-                }
-            }),
-            new BsonDocument("$group", new BsonDocument
-            {
-                { "_id", new BsonDocument
-                    {
-                        { "year", new BsonDocument("$year", "$date") },
-                        { "month", new BsonDocument("$month", "$date") },
-                        { "category", "$category" }
-                    }
-                },
-                { "totalSales", new BsonDocument("$sum", new BsonDocument("$multiply", new BsonArray { "$price", "$quantity" })) },
-                { "count", new BsonDocument("$sum", 1) }
-            }),
-            new BsonDocument("$project", new BsonDocument
-            {
-                { "year", "$_id.year" },
-                { "month", "$_id.month" },
-                { "category", "$_id.category" },
-                { "totalSales", 1 },
-                { "count", 1 },
-                { "averageSale", new BsonDocument("$divide", new BsonArray { "$totalSales", "$count" }) }
-            }),
-            new BsonDocument("$sort", new BsonDocument
-            {
-                { "year", 1 },
-                { "month", 1 },
-                { "category", 1 }
-            })
-        };
+                }),
+                new BsonDocument("$group", new BsonDocument
+                {
+                    { "_id", new BsonDocument
+                        {
+                            { "year", new BsonDocument("$year", "$date") },
+                            { "month", new BsonDocument("$month", "$date") },
+                            { "category", "$category" }
+                        }
+                    },
+                    { "totalSales", new BsonDocument("$sum", new BsonDocument("$multiply", new BsonArray { "$price", "$quantity" })) },
+                    { "count", new BsonDocument("$sum", 1) }
+                }),
+                new BsonDocument("$project", new BsonDocument
+                {
+                    { "year", "$_id.year" },
+                    { "month", "$_id.month" },
+                    { "category", "$_id.category" },
+                    { "totalSales", 1 },
+                    { "count", 1 },
+                    { "averageSale", new BsonDocument("$divide", new BsonArray { "$totalSales", "$count" }) }
+                }),
+                new BsonDocument("$sort", new BsonDocument
+                {
+                    { "year", 1 },
+                    { "month", 1 },
+                    { "category", 1 }
+                })
+            };
 
             var results = await _collection.Aggregate<BsonDocument>(pipeline).ToListAsync();
             return results;
