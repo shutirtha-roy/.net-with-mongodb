@@ -18,7 +18,7 @@ namespace AggregationAndMapReduce.Controllers
         [HttpPost("run-comparison")]
         public async Task<IActionResult> RunComparison()
         {
-            var dataSizes = new int[] { 10000, 100000, 1000000 };
+            var dataSizes = new int[] { 1, 10, 100, 1000, 10000, 100000, 1000000 };
             var result = await _performanceComparisonService.RunComparison(dataSizes);
 
             return Ok(result);

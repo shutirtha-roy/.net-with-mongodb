@@ -1,4 +1,5 @@
-﻿using Amazon.Runtime;
+﻿using AggregationAndMapReduce.BusinessObject;
+using Amazon.Runtime;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Diagnostics;
@@ -29,7 +30,6 @@ namespace AggregationAndMapReduce.Services
         {
             foreach (var size in dataSizes)
             {
-                Console.WriteLine($"Running comparison for {size} documents");
                 _metrics.Add($"Running comparison for {size} documents");
 
                 await _dataGenerator.GenerateData(size);
@@ -37,11 +37,10 @@ namespace AggregationAndMapReduce.Services
                 var aggregationResult = await MeasurePerformance(() => _aggregationAnalyzer.AnalyzeSales(new DateTime(2020, 1, 1), new DateTime(2024, 1, 1)));
                 var mapReduceResult = await MeasurePerformance(() => _mapReduceAnalyzer.AnalyzeSales(new DateTime(2020, 1, 1), new DateTime(2024, 1, 1)));
 
-                Console.WriteLine($"Aggregation Pipeline: {aggregationResult.ExecutionTime.TotalSeconds} seconds, {aggregationResult.MemoryUsed} MB");
-                Console.WriteLine($"Map-Reduce: {mapReduceResult.ExecutionTime.TotalSeconds} seconds, {mapReduceResult.MemoryUsed} MB");
+                _metrics.Add($"Aggregation Pipeline: {aggregationResult}");
+                _metrics.Add($"Map-Reduce: {mapReduceResult}");
+                _metrics.Add($"-----------------------------");
 
-                _metrics.Add($"Aggregation Pipeline: {aggregationResult.ExecutionTime.TotalSeconds} seconds, {aggregationResult.MemoryUsed} MB");
-                _metrics.Add($"Map-Reduce: {mapReduceResult.ExecutionTime.TotalSeconds} seconds, {mapReduceResult.MemoryUsed} MB");
 
                 await _database.DropCollectionAsync(_collectionName);
             }
@@ -52,26 +51,23 @@ namespace AggregationAndMapReduce.Services
         private async Task<PerformanceResult> MeasurePerformance(Func<Task<List<BsonDocument>>> operation)
         {
             var stopwatch = Stopwatch.StartNew();
+            var processBefore = Process.GetCurrentProcess();
+            var cpuTimeBefore = processBefore.TotalProcessorTime;
             var memoryBefore = GC.GetTotalMemory(true);
 
             var result = await operation();
 
+            var processAfter = Process.GetCurrentProcess();
+            var cpuTimeAfter = processAfter.TotalProcessorTime;
             var memoryAfter = GC.GetTotalMemory(false);
             stopwatch.Stop();
 
             return new PerformanceResult
             {
                 ExecutionTime = stopwatch.Elapsed,
-                MemoryUsed = (memoryAfter - memoryBefore) / (1024 * 1024), // Convert to MB
-                ResultCount = result.Count
+                MemoryUsed = (memoryAfter - memoryBefore) / (1024.0 * 1024.0),
+                PeakWorkingSet = processBefore.PeakWorkingSet64 / (1024.0 * 1024.0),
             };
         }
-    }
-
-    public class PerformanceResult
-    {
-        public TimeSpan ExecutionTime { get; set; }
-        public long MemoryUsed { get; set; }
-        public int ResultCount { get; set; }
     }
 }
