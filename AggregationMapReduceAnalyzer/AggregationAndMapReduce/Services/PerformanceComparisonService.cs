@@ -34,8 +34,8 @@ namespace AggregationAndMapReduce.Services
 
                 await _dataGenerator.GenerateData(size);
 
-                var aggregationResult = await MeasurePerformance(() => _aggregationAnalyzer.AnalyzeSales(new DateTime(2020, 1, 1), new DateTime(2024, 1, 1)));
-                var mapReduceResult = await MeasurePerformance(() => _mapReduceAnalyzer.AnalyzeSales(new DateTime(2020, 1, 1), new DateTime(2024, 1, 1)));
+                var aggregationResult = await MeasurePerformance(() => _aggregationAnalyzer.AnalyzeSales(new DateTime(2022, 1, 1), new DateTime(2024, 12, 31)));
+                var mapReduceResult = await MeasurePerformance(() => _mapReduceAnalyzer.AnalyzeSales(new DateTime(2022, 1, 1), new DateTime(2024, 12, 31)));
 
                 _metrics.Add($"Aggregation Pipeline: {aggregationResult}");
                 _metrics.Add($"Map-Reduce: {mapReduceResult}");
