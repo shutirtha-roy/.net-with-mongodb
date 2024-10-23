@@ -56,7 +56,15 @@ namespace AggregationAndMapReduce.Services
                     { "year", 1 },
                     { "month", 1 },
                     { "category", 1 }
-                })
+                }),
+
+                // To add the data in the database
+                //new BsonDocument("$merge", new BsonDocument
+                //{
+                //    { "into", "sales_aggregated" },
+                //    { "whenMatched", "replace" },
+                //    { "whenNotMatched", "insert" }
+                //})
             };
 
             var results = await _collection.Aggregate<BsonDocument>(pipeline).ToListAsync();
