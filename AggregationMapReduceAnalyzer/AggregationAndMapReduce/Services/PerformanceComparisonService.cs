@@ -34,8 +34,17 @@ namespace AggregationAndMapReduce.Services
 
                 await _dataGenerator.GenerateData(size);
 
-                var aggregationResult = await MeasurePerformance(() => _aggregationAnalyzer.AnalyzeSales(new DateTime(2022, 1, 1), new DateTime(2024, 12, 31)));
-                var mapReduceResult = await MeasurePerformance(() => _mapReduceAnalyzer.AnalyzeSales(new DateTime(2022, 1, 1), new DateTime(2024, 12, 31)));
+                var aggregationResult = await MeasurePerformance(
+                        () => _aggregationAnalyzer.AnalyzeSales
+                            (new DateTime(2022, 1, 1), 
+                                new DateTime(2024, 12, 31))
+                );
+
+                var mapReduceResult = await MeasurePerformance(
+                       () => _mapReduceAnalyzer.AnalyzeSales
+                           (new DateTime(2022, 1, 1), 
+                                new DateTime(2024, 12, 31))
+                );
 
                 _metrics.Add($"Aggregation Pipeline: {aggregationResult}");
                 _metrics.Add($"Map-Reduce: {mapReduceResult}");
@@ -48,7 +57,8 @@ namespace AggregationAndMapReduce.Services
             return _metrics;
         }
 
-        private async Task<PerformanceResult> MeasurePerformance(Func<Task<List<BsonDocument>>> operation)
+        private async Task<PerformanceResult> MeasurePerformance(
+            Func<Task<List<BsonDocument>>> operation)
         {
             var stopwatch = Stopwatch.StartNew();
             var processBefore = Process.GetCurrentProcess();
@@ -65,8 +75,10 @@ namespace AggregationAndMapReduce.Services
             return new PerformanceResult
             {
                 ExecutionTime = stopwatch.Elapsed,
-                MemoryUsed = (memoryAfter - memoryBefore) / (1024.0 * 1024.0),
-                PeakWorkingSet = processBefore.PeakWorkingSet64 / (1024.0 * 1024.0),
+                MemoryUsed = (memoryAfter - memoryBefore) 
+                    / (1024.0 * 1024.0),
+                PeakWorkingSet = processBefore.PeakWorkingSet64 
+                    / (1024.0 * 1024.0),
             };
         }
     }

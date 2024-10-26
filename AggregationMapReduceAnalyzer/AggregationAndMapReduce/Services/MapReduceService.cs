@@ -14,7 +14,8 @@ namespace AggregationAndMapReduce.Services
             _collection = database.GetCollection<BsonDocument>("sales_test");
         }
 
-        public async Task<List<BsonDocument>> AnalyzeSales(DateTime startDate, DateTime endDate)
+        public async Task<List<BsonDocument>> AnalyzeSales(DateTime startDate, 
+            DateTime endDate)
         {
             var filter = Builders<BsonDocument>.Filter.And(
                 Builders<BsonDocument>.Filter.Gte("date", startDate),
@@ -37,14 +38,16 @@ namespace AggregationAndMapReduce.Services
             return results;
         }
 
-        private static KeyValuePair<BsonDocument, BsonDocument>? Map(BsonDocument document)
+        private static KeyValuePair<BsonDocument, BsonDocument>? Map(BsonDocument 
+            document)
         {
             if (document.TryGetValue("date", out BsonValue dateValue) &&
                 document.TryGetValue("price", out BsonValue priceValue) &&
                 document.TryGetValue("quantity", out BsonValue quantityValue) &&
                 document.TryGetValue("category", out BsonValue categoryValue))
             {
-                if (dateValue.IsValidDateTime && priceValue.IsNumeric && quantityValue.IsNumeric)
+                if (dateValue.IsValidDateTime && priceValue.IsNumeric 
+                    && quantityValue.IsNumeric)
                 {
                     var date = dateValue.ToUniversalTime();
                     var year = date.Year;

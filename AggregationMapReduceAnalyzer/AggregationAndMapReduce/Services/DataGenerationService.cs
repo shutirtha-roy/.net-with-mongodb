@@ -43,7 +43,7 @@ namespace AggregationAndMapReduce.Services
 
                 documents.Add(document);
 
-                if (documents.Count == 1000)
+                if (documents.Count >= 1000)
                 {
                     await _collection.InsertManyAsync(documents);
                     documents.Clear();
