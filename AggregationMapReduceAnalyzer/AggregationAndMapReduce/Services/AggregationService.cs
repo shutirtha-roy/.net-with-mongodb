@@ -39,7 +39,8 @@ namespace AggregationAndMapReduce.Services
                             { "category", "$category" }
                         }
                     },
-                    { "totalSales", new BsonDocument("$sum", new BsonDocument("$multiply", new BsonArray { "$price", "$quantity" })) },
+                    { "totalSales", new BsonDocument("$sum", 
+                    new BsonDocument("$multiply", new BsonArray { "$price", "$quantity" })) },
                     { "count", new BsonDocument("$sum", 1) }
                 }),
                 new BsonDocument("$project", new BsonDocument
@@ -49,22 +50,15 @@ namespace AggregationAndMapReduce.Services
                     { "category", "$_id.category" },
                     { "totalSales", 1 },
                     { "count", 1 },
-                    { "averageSale", new BsonDocument("$divide", new BsonArray { "$totalSales", "$count" }) }
+                    { "averageSale", 
+                        new BsonDocument("$divide", new BsonArray { "$totalSales", "$count" }) }
                 }),
                 new BsonDocument("$sort", new BsonDocument
                 {
                     { "year", 1 },
                     { "month", 1 },
                     { "category", 1 }
-                }),
-
-                // To add the data in the database
-                //new BsonDocument("$merge", new BsonDocument
-                //{
-                //    { "into", "sales_aggregated" },
-                //    { "whenMatched", "replace" },
-                //    { "whenNotMatched", "insert" }
-                //})
+                })
             };
 
             var results = await _collection.Aggregate<BsonDocument>(pipeline).ToListAsync();
